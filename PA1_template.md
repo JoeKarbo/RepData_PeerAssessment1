@@ -141,7 +141,7 @@ abline(v = mean_total_steps, lwd = 1, lty = 2, col = "red")
 abline(v = median_total_steps, lwd = 1, lty = 2, col = "red")
 ```
 
-![plot of chunk unnamed-chunk-5](figure/unnamed-chunk-5-1.png)
+![plot of Total steps](C:/Users/jkarbowniczek/Desktop/OneDrive for Business/CODE/Coursera/Reproducible Research/Week 2/TotalSteps.png)
         
 The mean number of steps taken each day is 9354, the median number is 10395. 
 These numbers are also indicated with the red dashed lines above.
