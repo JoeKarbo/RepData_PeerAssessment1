@@ -1,3 +1,8 @@
+---
+title: "Week 2 Project_Rep.Research"
+author: "Joe Karbowniczek"
+date: "1/15/2020"
+output: html_document
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE, cache = FALSE)
@@ -6,7 +11,7 @@ knitr::opts_chunk$set(echo = TRUE, cache = FALSE)
 1. Loading the data
 -------------------
 
-We set the working directory followed by downloading the dataset from its url and unzipping the file to "step_data.csv". The data comes from Roger Pengs [github account](https://github.com/rdpeng/RepData_PeerAssessment1).
+Set the working directory followed by downloading the dataset from its url and unzipping the file to "step_data.csv". The data comes from Roger Pengs [github account](https://github.com/rdpeng/RepData_PeerAssessment1).
 
 ```{r load data}
 setwd("C:/Users/jkarbowniczek/Desktop/OneDrive for Business/CODE/Coursera/Reproducible Research/Week 2")
