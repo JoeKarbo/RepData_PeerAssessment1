@@ -182,7 +182,7 @@ abline(v = max_average_steps_interval, lwd = 1, lty = 2, col = "red")
 abline(h = max_average_steps, lwd = 1, lty = 2, col = "red")
 ```
 
-![plot of chunk unnamed-chunk-6](figure/unnamed-chunk-6-1.png)
+![plot of Average Daily Activity](instructions_fig/AvgDailyPattern.png)
 
 The average daily activity pattern is shown in the plot above.
 835 is the 5-minute interval that, on average, contains the maximum number of 206 steps. 
