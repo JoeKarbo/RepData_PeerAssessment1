@@ -1,203 +1,391 @@
 ---
-title: "Week 2 Project_Rep.Research"
-author: "Joe Karbowniczek"
-date: "1/15/2020"
-output: html_document
+title: "Reproducible Research: Peer Assessment 1"
+output: 
+  html_document:
+    keep_md: true
+---
 
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE, cache = FALSE)
+# Reproducible Research - Course Project 1
+
+This document analyzes an activity dataset containing number of steps recorded in 5-minute intervals across various days.
+
+It was generated using [Knitr](https://github.com/yihui/knitr)
+
+	install.packages('knitr', dependencies = TRUE)
+	library(knitr)
+	knit2html("PA1_template.Rmd", force_v1 = TRUE)
+
+It also includes some sample data output to verify results.
+
+
+	
+## Loading and preprocessing the data
+
+The following code loads the data into a variable `activity`. The script will attempt to download and unzip the file if it doesn't exist inside the work directory.
+
+
+```r
+# Download zip file if it doesn't already exist in the workspace
+dataurl <- "https://d396qusza40orc.cloudfront.net/repdata%2Fdata%2Factivity.zip"
+if (!file.exists("activity.zip")) {
+	download.file(dataurl, destfile = "activity.zip", method = "curl")
+}
+
+# Unzip data
+datafile <- "activity.csv"
+if (!file.exists(datafile)) {
+	unzip(zipfile = "activity.zip")
+}
+
+# Load data
+activity <- read.csv(datafile, header = TRUE)
+
+# To prevent scientific notation
+options(scipen = 100)
 ```
 
-1. Loading the data
--------------------
+Let's take a look at the data:
 
-Set the working directory followed by downloading the dataset from its url and unzipping the file to "step_data.csv". The data comes from Roger Pengs [github account](https://github.com/rdpeng/RepData_PeerAssessment1).
 
-```{r load data}
-setwd("C:/Users/jkarbowniczek/Desktop/OneDrive for Business/CODE/Coursera/Reproducible Research/Week 2")
-url <- "https://d396qusza40orc.cloudfront.net/repdata%2Fdata%2Factivity.zip"
-destfile <- "step_data.zip"
-download.file(url, destfile)
-unzip(destfile)
-activity <- read.csv("activity.csv", sep = ",")
+```r
+dim(activity)
 ```
 
-The variable names and the structure of the file are given by
-```{r activity details}
-names(activity)
+```
+## [1] 17568     3
+```
+
+```r
 str(activity)
-head(activity[which(!is.na(activity$steps)), ]) # data set with NA rows removed
-```
-The format of the file is ready for analysis. No further processing is required. 
-
-2. Mean of "total number of step taken per day" over all days
--------------------------------------------------------------
-
-Group the number of steps by date and intervals. Find the total number of steps per day over all days. Note that some of the days such as 2012-10-01 have no steps data. Remove such rows for this part.
-
-```{r steps mean}
-library(reshape2)
-activity_melt <- melt(activity[which(!is.na(activity$steps)), ], id.vars = c("date", "interval"))
-head(activity_melt)
-steps_sum <- dcast(activity_melt, date ~ variable, sum)
-head(steps_sum)
 ```
 
-Then we can find the mean of 'total number of steps per day'.
-```{r total steps per day summary}
-summary(steps_sum$steps)
+```
+## 'data.frame':	17568 obs. of  3 variables:
+##  $ steps   : int  NA NA NA NA NA NA NA NA NA NA ...
+##  $ date    : Factor w/ 61 levels "2012-10-01","2012-10-02",..: 1 1 1 1 1 1 1 1 1 1 ...
+##  $ interval: int  0 5 10 15 20 25 30 35 40 45 ...
 ```
 
-Histogram of the total number of steps taken each day.
-```{r total step per day histogram}
-hist(steps_sum$steps, main = "Histogram of total steps taken per day",
-     xlab = "Total steps per day", ylab = "Number of days", 
-     breaks = 10, col = "steel blue")
-abline(v = mean(steps_sum$steps), lty = 1, lwd = 2, col = "red")
-abline(v = median(steps_sum$steps), lty = 2, lwd = 2, col = "black")
-legend(x = "topright", c("Mean", "Median"), col = c("red", "black"),       lty = c(1, 2), lwd = c(2, 2))
+```r
+head(activity)
 ```
 
-Equivalent ggplot.
-```{r ggplot histogram}
-library(ggplot2)
-ggplot(steps_sum, aes(steps)) + geom_histogram(bins = 10)
+```
+##   steps       date interval
+## 1    NA 2012-10-01        0
+## 2    NA 2012-10-01        5
+## 3    NA 2012-10-01       10
+## 4    NA 2012-10-01       15
+## 5    NA 2012-10-01       20
+## 6    NA 2012-10-01       25
 ```
 
-Here's a plot showing the trend in total number of steps taken per day over two months.
-```{r total steps trend}
-library(lubridate)
-steps_sum$date <- as.Date(steps_sum$date)
-ggplot(steps_sum, aes(date, steps)) + geom_line() +            
-        scale_x_date(date_labels = "%b %d") + 
-        ylab("Total number of steps")
+```r
+summary(activity)
 ```
 
-3. Average daily activity pattern
----------------------------------
-
-In this section, we make a time series plot (i.e. type = "l") of the 5-minute interval (x-axis) and the average number of steps taken averaged across all days.
-
-```{r time series plot}
-stepsmeaninterval <- dcast(activity_melt, interval ~ variable, mean, na.rm = TRUE)
-head(stepsmeaninterval)
-plot(stepsmeaninterval$interval, stepsmeaninterval$steps, ty = "l", 
-     xlab = "time interval", ylab = "Average steps", main = "Average 
-     steps taken over all days vs \n time interval")
+```
+##      steps                date          interval     
+##  Min.   :  0.00   2012-10-01:  288   Min.   :   0.0  
+##  1st Qu.:  0.00   2012-10-02:  288   1st Qu.: 588.8  
+##  Median :  0.00   2012-10-03:  288   Median :1177.5  
+##  Mean   : 37.38   2012-10-04:  288   Mean   :1177.5  
+##  3rd Qu.: 12.00   2012-10-05:  288   3rd Qu.:1766.2  
+##  Max.   :806.00   2012-10-06:  288   Max.   :2355.0  
+##  NA's   :2304     (Other)   :15840
 ```
 
-The time interval during which the maximum number of steps is taken is
+To prepare the data I'm going to use the `dplyr` package:
 
-```{r max steps}
-maxsteps_interval <- stepsmeaninterval$interval[which.max(stepsmeaninterval$steps)]
-maxsteps_interval
-```
 
-4. Imputing missing values
---------------------------
-
-First of all, let us get a sense for the missing values. Are there days with all time intervals reporting NA step values? 
-
-We can replace the missing data for a day by the time average over all other days. 
-```{r impute missing days data}
-## Impute missing values
-activity2 <- split(activity, activity$interval)
-activity2 <- lapply(activity2, function(x) {
-        x$steps[which(is.na(x$steps))] <- mean(x$steps, na.rm = TRUE)
-        return(x)
-})
-activity2 <- do.call("rbind", activity2)
-row.names(activity2) <- NULL
-
-activity2 <- split(activity2, activity2$date)
-df <- lapply(activity2, function(x) {
-        x$steps[which(is.na(x$steps))] <- mean(x$steps, na.rm = TRUE)
-        return(x)
-})
-activity2 <- do.call("rbind", activity2)
-row.names(activity2) <- NULL
-head(activity2)
-```
-Assuming that the time intervals form a disjoint partitioning of 24 hrs, i.e. 1 day is found to be erroneous. The time interval for each day corresponds to approximately 40 hours, which refutes the intervals being disjoint.
-
-```{r steps mean2}
-library(reshape2)
-activity_melt2 <- melt(activity2, id.vars = c("date", "interval"))
-steps_sum <- dcast(activity_melt2, date ~ variable, sum, na.rm = TRUE)
-head(steps_sum)
-```
-Histogram of the total number of steps taken each day with the imputed missing values.
-```{r total step per day histogram2}
-hist(steps_sum$steps, main = "Histogram of total steps taken per day", 
-     xlab = "Total steps per day", ylab = "Number of days", 
-     breaks = 10, col = "steel blue")
-abline(v = mean(steps_sum$steps), lty = 1, lwd = 2, col = "red")
-abline(v = median(steps_sum$steps), lty = 2, lwd = 2, col = "black")
-legend(x = "topright", c("Mean", "Median"), col = c("red", "black"), lty = c(2, 1), lwd = c(2, 2))
-```
-
-Number of rows with NA values
-```{r NA row num}
-sum(is.na(activity$steps))
-sum(is.na(activity$steps))*100/nrow(activity) # Percentage of rows with missing values
-```
-
-5. Differences in activity patterns: Weekdays vs Weekends
----------------------------------------------------------
-
-Create a new column describing if the date is a weekday or weekend.
-
-```{r weekday status}
-library(lubridate)
-weekends <- which(weekdays(as.Date(activity2$date)) == "Saturday" |
-              weekdays(as.Date(activity2$date)) == "Sunday")
-weekdays <- which(weekdays(as.Date(activity2$date)) != "Saturday" &
-              weekdays(as.Date(activity2$date)) != "Sunday")
-temp <- c(rep("a", length(activity2)))
-temp[weekends] <- "weekend"
-temp[weekdays] <- "weekday"
-length(temp)
-names(temp) <- "day"
-activity2 <- cbind(activity2, temp)
-names(activity2)[4] <- "day"
-```
-
-Steps taken over each interval averaged across weekday days and weekend days.
-
-```{r}
-activity2split <- split(activity2, activity2$day)
-stepsmean_interval <- lapply(activity2split, function(x) {
-        temp <- aggregate(x$steps, list(x$interval), mean)
-        names(temp) <- c("interval", "steps")
-        return(temp)
-})
-
-## Unsplit stepsmean_interval
-stepsmean_interval <- do.call("rbind", stepsmean_interval)
-weekdays <- grep("weekday" ,row.names(stepsmean_interval))
-weekends <- grep("weekend" ,row.names(stepsmean_interval))
-temp <- c(rep("a", length(stepsmean_interval$steps)))
-temp[weekdays] <- "weekdays"
-temp[weekends] <- "weekends"
-stepsmean_interval <- cbind(stepsmean_interval, temp)
-row.names(stepsmean_interval) <- NULL
-names(stepsmean_interval)[3] <- "day"
-head(stepsmean_interval)
-tail(stepsmean_interval)
-
-library(ggplot2)
-ggplot(stepsmean_interval, aes(interval, steps)) + geom_line() + facet_grid(day ~ .) 
-```
-
-The mean number of steps taken over the weekdays and weekends.
-
-```{r weekday/end mean steps}
-stepsdatamelt <- melt(stepsmean_interval, id.vars = c("interval",
-                                                      "day"))
-dcast(stepsdatamelt, day ~ variable, mean) # Average steps
+```r
+library(dplyr)
 ```
 
 
 
+## What is mean total number of steps taken per day?
 
 
+
+
+```r
+# Get the total steps per date
+steps_by_date <- select(activity, steps, date, interval) %>%
+	#filter(!is.na(steps)) %>% # removed filter to include NAs as 0-step days in histogram
+    group_by(date) %>% 
+    summarize(total_steps = sum(steps, na.rm = TRUE))
+
+dim(steps_by_date)
+```
+
+```
+## [1] 61  2
+```
+
+```r
+# Plot the histogram
+hist(steps_by_date$total_steps, 
+	main = "Histogram of total steps per day", 
+	xlab = "Total steps per day", 
+	ylab = "Frequency [number of days]", 
+	breaks = 20,
+	border = "cadetblue4",
+	col = "cadetblue3"
+)
+
+mean_total_steps <- mean(steps_by_date$total_steps)
+median_total_steps <- median(steps_by_date$total_steps)
+
+abline(v = mean_total_steps, lwd = 1, lty = 2, col = "red")
+abline(v = median_total_steps, lwd = 1, lty = 2, col = "red")
+```
+
+![plot of Total Steps](instructions_fig/TotalSteps.png)
+        
+The mean number of steps taken each day is 9354, the median number is 10395. 
+These numbers are also indicated with the red dashed lines above.
+		
+
+		
+## What is the average daily activity pattern?
+
+
+```r
+# Get the average number of steps per interval
+steps_by_interval <- select(activity, steps, date, interval) %>% 
+	group_by(interval) %>% 
+	summarize(average_steps = mean(steps, na.rm = TRUE))
+
+dim(steps_by_interval)
+```
+
+```
+## [1] 288   2
+```
+
+```r
+plot(steps_by_interval$interval, steps_by_interval$average_steps, type = "l",
+	main = "Average steps by 5-minute interval",
+	xlab = "Interval",
+	ylab = "Average number of steps",
+	col = "cadetblue4"
+)
+
+max_average_steps <- max(steps_by_interval$average_steps)
+
+max_average_steps_interval <- steps_by_interval[
+	steps_by_interval$average_steps == max_average_steps,
+]$interval
+
+abline(v = max_average_steps_interval, lwd = 1, lty = 2, col = "red")
+abline(h = max_average_steps, lwd = 1, lty = 2, col = "red")
+```
+
+![plot of Average Daily Activity](instructions_fig/AvgDailyPattern.png)
+
+The average daily activity pattern is shown in the plot above.
+835 is the 5-minute interval that, on average, contains the maximum number of 206 steps. 
+I have also marked this point with the red dashed lines.
+
+
+
+## Imputing missing values
+
+Of 17568 total rows, 2304 have an NA value instead of a usable number of steps.
+My strategy is to replace NA values with the average number of steps for the given 5-minute interval. 
+The average number of steps per interval has already been calculated above, so I'm going to look the averages in `steps_by_interval`.
+
+
+```r
+# Sample of some averages in steps_by_interval:
+steps_by_interval[steps_by_interval$interval %in% c(600,1000,2000),]
+```
+
+```
+## Source: local data frame [3 x 2]
+## 
+##   interval average_steps
+##      (int)         (dbl)
+## 1      600      31.49057
+## 2     1000      40.56604
+## 3     2000      19.62264
+```
+
+```r
+# Sample of NAs before replacement:
+head(activity[which(is.na(activity$steps) & activity$interval %in% c(600,1000,2000)),], n = 30)
+```
+
+```
+##       steps       date interval
+## 73       NA 2012-10-01      600
+## 121      NA 2012-10-01     1000
+## 241      NA 2012-10-01     2000
+## 2089     NA 2012-10-08      600
+## 2137     NA 2012-10-08     1000
+## 2257     NA 2012-10-08     2000
+## 9001     NA 2012-11-01      600
+## 9049     NA 2012-11-01     1000
+## 9169     NA 2012-11-01     2000
+## 9865     NA 2012-11-04      600
+## 9913     NA 2012-11-04     1000
+## 10033    NA 2012-11-04     2000
+## 11305    NA 2012-11-09      600
+## 11353    NA 2012-11-09     1000
+## 11473    NA 2012-11-09     2000
+## 11593    NA 2012-11-10      600
+## 11641    NA 2012-11-10     1000
+## 11761    NA 2012-11-10     2000
+## 12745    NA 2012-11-14      600
+## 12793    NA 2012-11-14     1000
+## 12913    NA 2012-11-14     2000
+## 17353    NA 2012-11-30      600
+## 17401    NA 2012-11-30     1000
+## 17521    NA 2012-11-30     2000
+```
+
+```r
+# I tried this mutate statement first, but it updated only the first NA, and left the others alone:
+# updated_activity <- mutate(activity,
+#	steps = ifelse(is.na(steps), 
+#		steps_by_interval[steps_by_interval$interval==interval,]$average_steps, 
+#		steps))
+
+# Not very elegant, but working solution - loop and replace NAs one by one:
+updated_activity <- activity
+for(r in 1:nrow(updated_activity)) {
+	if (is.na(updated_activity$steps[r])) {
+		i <- updated_activity$interval[r];
+		avg <- steps_by_interval[steps_by_interval$interval==i,]$average_steps
+		
+		updated_activity$steps[r] <- avg
+	}
+}
+
+# Todo: Find a better way
+
+# Sample of NAs after replacement:
+head(updated_activity[which(
+	updated_activity$date %in% c("2012-10-01", "2012-10-08", "2012-11-01", "2012-11-04", "2012-11-09", "2012-11-10") & 
+	updated_activity$interval %in% c(600,1000,2000)),], n = 30)
+```
+
+```
+##          steps       date interval
+## 73    31.49057 2012-10-01      600
+## 121   40.56604 2012-10-01     1000
+## 241   19.62264 2012-10-01     2000
+## 2089  31.49057 2012-10-08      600
+## 2137  40.56604 2012-10-08     1000
+## 2257  19.62264 2012-10-08     2000
+## 9001  31.49057 2012-11-01      600
+## 9049  40.56604 2012-11-01     1000
+## 9169  19.62264 2012-11-01     2000
+## 9865  31.49057 2012-11-04      600
+## 9913  40.56604 2012-11-04     1000
+## 10033 19.62264 2012-11-04     2000
+## 11305 31.49057 2012-11-09      600
+## 11353 40.56604 2012-11-09     1000
+## 11473 19.62264 2012-11-09     2000
+## 11593 31.49057 2012-11-10      600
+## 11641 40.56604 2012-11-10     1000
+## 11761 19.62264 2012-11-10     2000
+```
+
+```r
+updated_steps_by_date <- select(updated_activity, steps, date, interval) %>% 
+    group_by(date) %>% 
+    summarize(total_steps = sum(steps, na.rm = TRUE))
+
+hist(updated_steps_by_date$total_steps, 
+	main = "Histogram of total steps per day,\nreplacing NAs with average steps for given interval", 
+	xlab = "Total steps per day", 
+	ylab = "Frequency [number of days]", 
+	breaks = 20,
+	border = "cadetblue4",
+	col = "cadetblue3"
+)
+
+updated_mean_total_steps <- mean(updated_steps_by_date$total_steps)
+updated_median_total_steps <- median(updated_steps_by_date$total_steps)
+
+abline(v = updated_mean_total_steps, lwd = 1, lty = 2, col = "red")
+abline(v = updated_median_total_steps, lwd = 1, lty = 2, col = "red")
+```
+
+![plot of Total Steps without NAs](instructions_fig/Total_Steps_NoNAs.png)
+
+The large number of 0-step days disappeared from the histogram after replacing 
+the NAs with the average number of steps for a given interval. Also note how mean 
+and median number of steps meet up at the same point now.
+The mean number of steps taken each day is now 10766 
+(compared to 9354 with NAs), and the median number 
+is 10766 now (compared to 10395 with NAs). 
+
+
+
+## Are there differences in activity patterns between weekdays and weekends?
+
+
+```r
+activity_with_weekday <- mutate(updated_activity, 
+	weekday = weekdays(as.Date(updated_activity$date)),
+	weekday_is = as.factor(ifelse(weekday=="Saturday" | weekday=="Sunday", "weekend", "weekday"))
+)
+
+# Sample of the extended data
+head(select(activity_with_weekday, date, weekday, weekday_is) %>% distinct(date), n = 20)
+```
+
+```
+##          date   weekday weekday_is
+## 1  2012-10-01    Monday    weekday
+## 2  2012-10-02   Tuesday    weekday
+## 3  2012-10-03 Wednesday    weekday
+## 4  2012-10-04  Thursday    weekday
+## 5  2012-10-05    Friday    weekday
+## 6  2012-10-06  Saturday    weekend
+## 7  2012-10-07    Sunday    weekend
+## 8  2012-10-08    Monday    weekday
+## 9  2012-10-09   Tuesday    weekday
+## 10 2012-10-10 Wednesday    weekday
+## 11 2012-10-11  Thursday    weekday
+## 12 2012-10-12    Friday    weekday
+## 13 2012-10-13  Saturday    weekend
+## 14 2012-10-14    Sunday    weekend
+## 15 2012-10-15    Monday    weekday
+## 16 2012-10-16   Tuesday    weekday
+## 17 2012-10-17 Wednesday    weekday
+## 18 2012-10-18  Thursday    weekday
+## 19 2012-10-19    Friday    weekday
+## 20 2012-10-20  Saturday    weekend
+```
+
+```r
+library(lattice) 
+
+# Get average number of steps per weekday/weekend and interval
+summary <- select(activity_with_weekday, steps, date, interval, weekday_is) %>% 
+    group_by(weekday_is, interval) %>% 
+    summarize(average_steps = mean(steps, na.rm = TRUE))
+
+xyplot(average_steps ~ interval | weekday_is, data = summary, layout = c(1,2), type = "l",
+	main = "Average steps by 5-minute interval",
+	xlab = "Interval",
+	ylab = "Average number of steps",
+	col = "cadetblue4"
+)
+```
+
+![plot of Weekday vs. Weekends](instructions_fig/Weekdays_Weekends.png)
+
+Yes, there is a difference in activity patterns between weekdays and weekends.
+It looks like the activities start a little later and more gradually on the weekends. The step volume is also a bit higher throughout the day.
+On weekdays the step volume appears to be higher and increase quicker (more steeply) in the mornings, but remains a little lower throughout the day.
+
+
+```r
+# Clean up
+rm(list=ls(all=TRUE)) 
+```
