@@ -314,7 +314,7 @@ abline(v = updated_mean_total_steps, lwd = 1, lty = 2, col = "red")
 abline(v = updated_median_total_steps, lwd = 1, lty = 2, col = "red")
 ```
 
-![plot of Total steps](instructions_fig/TotalSteps.png)
+![plot of Weekday vs. Weekend](instructions_fig/Weekday.Weekend.png)
 
 The large number of 0-step days disappeared from the histogram after replacing 
 the NAs with the average number of steps for a given interval. Also note how mean 
