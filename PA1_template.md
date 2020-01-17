@@ -314,7 +314,7 @@ abline(v = updated_mean_total_steps, lwd = 1, lty = 2, col = "red")
 abline(v = updated_median_total_steps, lwd = 1, lty = 2, col = "red")
 ```
 
-![plot of Weekday vs. Weekend](instructions_fig/Weekday.Weekend.png)
+![plot of Total Steps without NAs](instructions_fig/Total_Steps_NoNAs.png)
 
 The large number of 0-step days disappeared from the histogram after replacing 
 the NAs with the average number of steps for a given interval. Also note how mean 
@@ -378,7 +378,7 @@ xyplot(average_steps ~ interval | weekday_is, data = summary, layout = c(1,2), t
 )
 ```
 
-![plot of chunk unnamed-chunk-8](figure/unnamed-chunk-8-1.png)
+![plot of Weekday vs. Weekends](instructions_fig/Weekdays_Weekends.png)
 
 Yes, there is a difference in activity patterns between weekdays and weekends.
 It looks like the activities start a little later and more gradually on the weekends. The step volume is also a bit higher throughout the day.
